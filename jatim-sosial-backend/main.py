@@ -54,45 +54,64 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 # --- 5. ORKESTRASI ASESMEN ---
 
-# Jalur Teks (Tim 1 + 3)
+# --- ENDPOINT ASESMEN TEKS (Gabungan Tim 1 lalu Tim 3) ---
 @app.post("/api/v1/asesmen/sosial", tags=["Asesmen"])
 async def asesmen_sosial(data: DataWarga, current_user = Depends(get_current_user)):
-    URL_AI_TEXT = "http://127.0.0.1:8001/api/ai/text-analysis"
+    URL_TIM_1 = "http://127.0.0.1:8001/api/ai/tim1-klasifikasi"
+    URL_TIM_3 = "http://127.0.0.1:8001/api/ai/tim3-rekomendasi"
     
     try:
-        # 1. Simpan data warga ke Supabase
+        # 1. Simpan data warga awal ke Supabase
         res_warga = supabase.table("warga").insert(data.model_dump()).execute()
         warga_id = res_warga.data[0]["id"]
         
         async with httpx.AsyncClient() as client:
-            # 2. Panggil API Tim 1+3
-            res_ai = await client.post(URL_AI_TEXT, json=data.model_dump(), timeout=10.0)
-            hasil_ai = res_ai.json()
+            # 2. PANGGIL API TIM 1 (Dapatkan Desil)
+            res_tim1 = await client.post(URL_TIM_1, json=data.model_dump(), timeout=10.0)
+            res_tim1.raise_for_status()
+            hasil_tim1 = res_tim1.json()
+            desil_warga = hasil_tim1["desil"]
             
-            # 3. Simpan hasil ke tabel hasil_asesmen
+            # 3. PANGGIL API TIM 3 (Minta Rekomendasi berdasarkan Desil)
+            # Kita gabungkan profil warga dengan desil dari Tim 1
+            payload_tim3 = data.model_dump()
+            payload_tim3["desil"] = desil_warga 
+            
+            res_tim3 = await client.post(URL_TIM_3, json=payload_tim3, timeout=10.0)
+            res_tim3.raise_for_status()
+            hasil_tim3 = res_tim3.json()
+            
+            # 4. SIMPAN KE DATABASE HASIL ASESMEN
             supabase.table("hasil_asesmen").insert({
                 "warga_id": warga_id,
                 "petugas_email": current_user.email,
-                "desil": hasil_ai["klasifikasi"]["desil"],
-                "rekomendasi_program": str(hasil_ai["rekomendasi"])
+                "desil": desil_warga,
+                "kategori_kesejahteraan": hasil_tim1["kategori"],
+                "rekomendasi_program": str(hasil_tim3["rekomendasi"])
             }).execute()
             
-            return {"warga_id": warga_id, "hasil_sosial": hasil_ai}
+            return {
+                "status": "Sukses",
+                "warga_id": warga_id, 
+                "klasifikasi_tim1": hasil_tim1,
+                "rekomendasi_tim3": hasil_tim3
+            }
+            
     except httpx.RequestError:
-        raise HTTPException(status_code=503, detail="Server AI (Port 8001) tidak merespon")
+        raise HTTPException(status_code=503, detail="Server Tim AI tidak merespon. Pastikan port 8001 menyala.")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gagal memproses data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Gagal memproses orkestrasi: {str(e)}")
 
-# Jalur Visual (Tim 2)
+# --- ENDPOINT ASESMEN VISUAL (Tim 2) ---
 @app.post("/api/v1/asesmen/visual/{warga_id}", tags=["Asesmen"])
 async def asesmen_visual(warga_id: str, file: UploadFile = File(...), current_user = Depends(get_current_user)):
-    URL_AI_VISUAL = "http://127.0.0.1:8001/api/ai/visual-analysis"
+    URL_TIM_2 = "http://127.0.0.1:8001/api/ai/tim2-visual"
     
     try:
         async with httpx.AsyncClient() as client:
             # Kirim file ke API Dummy Tim 2
             files = {"file": (file.filename, file.file, file.content_type)}
-            res_ai = await client.post(URL_AI_VISUAL, files=files, timeout=15.0)
+            res_ai = await client.post(URL_TIM_2, files=files, timeout=15.0)
             hasil_visual = res_ai.json()
             
             # Update data hasil_asesmen di Supabase
@@ -101,5 +120,8 @@ async def asesmen_visual(warga_id: str, file: UploadFile = File(...), current_us
             }).eq("warga_id", warga_id).execute()
             
             return hasil_visual
+            
     except httpx.RequestError:
-        raise HTTPException(status_code=503, detail="Server AI Visual tidak merespon")
+        raise HTTPException(status_code=503, detail="Server API Visual (Tim 2) tidak merespon")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal memproses visual: {str(e)}")
