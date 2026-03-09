@@ -51,7 +51,7 @@ async def main():
                         f"{BASE_URL}/api/v1/asesmen/sosial", 
                         json=data_warga, 
                         headers=headers,
-                        timeout=15.0
+                        timeout=None
                     )
                     
                     if res_api.status_code == 200:
