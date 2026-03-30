@@ -1,3 +1,5 @@
 jatim-sosial-backend/.env
+jatim-sosial-backend/venv/
 jatim-sosial-backend/data_tim1.csv
 jatim-sosial-backend/chroma_data/chroma.sqlite3
+jatim-sosial-backend/__pycache__/
