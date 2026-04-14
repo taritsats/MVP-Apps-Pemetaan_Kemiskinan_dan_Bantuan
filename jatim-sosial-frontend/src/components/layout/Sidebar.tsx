@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   PlusCircle, 
@@ -12,15 +13,16 @@ import logoJatim from '../../assets/Lambang_Provinsi_Jawa_Timur.svg';
 
 interface SidebarProps {
   onLogout?: () => void;
-  activePath?: string;
-  onNavigate?: (path: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onLogout, activePath = '/dashboard', onNavigate }) => {
-  const handleNavigate = (path: string) => {
-    if (onNavigate) {
-      onNavigate(path);
-    }
+const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activePath = location.pathname;
+
+  const handleLogout = () => {
+    if (onLogout) onLogout();
+    navigate('/login');
   };
 
   return (
@@ -35,32 +37,32 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout, activePath = '/dashboard', 
       
       <nav className="sidebar-nav">
         <ul>
-          <li className={activePath === '/dashboard' ? 'active' : ''} onClick={() => handleNavigate('/dashboard')}>
+          <li className={activePath === '/dashboard' ? 'active' : ''} onClick={() => navigate('/dashboard')}>
             <LayoutDashboard size={20} /> <span>Dashboard</span>
           </li>
-          <li className={activePath === '/analisis-baru' ? 'active' : ''} onClick={() => handleNavigate('/analisis-baru')}>
+          <li className={activePath === '/analisis-baru' ? 'active' : ''} onClick={() => navigate('/analisis-baru')}>
             <PlusCircle size={20} /> <span>Analisis Baru</span>
           </li>
-          <li className={activePath === '/riwayat' ? 'active' : ''} onClick={() => handleNavigate('/riwayat')}>
+          <li className={activePath === '/riwayat' ? 'active' : ''} onClick={() => navigate('/riwayat')}>
             <History size={20} /> <span>Riwayat Analisis</span>
           </li>
-          <li className={activePath === '/antrean' ? 'active' : ''} onClick={() => handleNavigate('/antrean')}>
+          <li className={activePath === '/antrean' ? 'active' : ''} onClick={() => navigate('/antrean')}>
             <ClipboardCheck size={20} /> <span>Antrean Validasi</span>
           </li>
-          <li className={activePath === '/basis-pengetahuan' ? 'active' : ''} onClick={() => handleNavigate('/basis-pengetahuan')}>
+          <li className={activePath === '/basis-pengetahuan' ? 'active' : ''} onClick={() => navigate('/basis-pengetahuan')}>
             <BookOpen size={20} /> <span>Basis Pengetahuan</span>
           </li>
-          <li className={activePath === '/status-bantuan' ? 'active' : ''} onClick={() => handleNavigate('/status-bantuan')}>
+          <li className={activePath === '/status-bantuan' ? 'active' : ''} onClick={() => navigate('/status-bantuan')}>
             <ClipboardCheck size={20} /> <span>Status Bantuan</span>
           </li>
-          <li className={activePath === '/pengaturan' ? 'active' : ''} onClick={() => handleNavigate('/pengaturan')}>
+          <li className={activePath === '/pengaturan' ? 'active' : ''} onClick={() => navigate('/pengaturan')}>
             <Settings size={20} /> <span>Pengaturan</span>
           </li>
         </ul>
       </nav>
       
       <div className="sidebar-footer">
-        <button className="logout-btn" onClick={onLogout}>
+        <button className="logout-btn" onClick={handleLogout}>
           <LogOut size={20} /> <span>Logout</span>
         </button>
       </div>

@@ -13,7 +13,6 @@ import './Pengaturan.css';
 
 interface PengaturanProps {
   onLogout?: () => void;
-  onNavigate?: (path: string) => void;
 }
 
 type Role = 'ANALYST' | 'PETUGAS' | 'ADMIN';
@@ -50,7 +49,7 @@ const mockDepartments: Department[] = [
   { id: 'd3', name: 'Dinas Pendidikan', abbrev: 'DIKNAS', icon: 'academic-cap', syncStatus: 'Pending' },
 ];
 
-const Pengaturan: React.FC<PengaturanProps> = ({ onLogout, onNavigate }) => {
+const Pengaturan: React.FC<PengaturanProps> = ({ onLogout }) => {
   const [users] = useState<User[]>(initialUsers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -82,7 +81,7 @@ const Pengaturan: React.FC<PengaturanProps> = ({ onLogout, onNavigate }) => {
   };
 
   return (
-    <AdminLayout title="Pengaturan Sistem" activePath="/pengaturan" onLogout={onLogout} onNavigate={onNavigate}>
+    <AdminLayout title="Pengaturan Sistem" onLogout={onLogout}>
       <div className="pengaturan-page-wrapper">
         
         {/* Header Section */}

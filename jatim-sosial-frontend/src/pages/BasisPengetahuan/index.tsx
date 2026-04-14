@@ -16,7 +16,6 @@ import './BasisPengetahuan.css';
 
 interface BasisPengetahuanProps {
   onLogout?: () => void;
-  onNavigate?: (path: string) => void;
 }
 
 interface PolicyDocument {
@@ -91,7 +90,7 @@ const mockDocuments: PolicyDocument[] = [
 const jenisProgramFilters = ['Semua', 'PKH', 'BPNT', 'BLT BBM', 'Disabilitas'];
 const jenisRegulasiFilters = ['Peraturan Gubernur', 'SK Gubernur', 'Instruksi Gubernur', 'Surat Edaran'];
 
-const BasisPengetahuan: React.FC<BasisPengetahuanProps> = ({ onLogout, onNavigate }) => {
+const BasisPengetahuan: React.FC<BasisPengetahuanProps> = ({ onLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeProgram, setActiveProgram] = useState<string>('Semua');
   const [activeRegulasi, setActiveRegulasi] = useState<string[]>([]);
@@ -104,7 +103,7 @@ const BasisPengetahuan: React.FC<BasisPengetahuanProps> = ({ onLogout, onNavigat
   };
 
   return (
-    <AdminLayout title="Basis Pengetahuan" activePath="/basis-pengetahuan" onLogout={onLogout} onNavigate={onNavigate}>
+    <AdminLayout title="Basis Pengetahuan" onLogout={onLogout}>
       <div className={`bp-page-wrapper ${selectedDoc ? 'panel-open' : ''}`}>
         
         {/* Main Content Area */}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/layout/AdminLayout';
 import { Search, Eye, Clock, Activity, CheckCircle, AlertCircle } from 'lucide-react';
 import TimelineModal, { type TimelineEvent } from '../../components/ui/TimelineModal';
@@ -8,7 +9,6 @@ import './StatusBantuan.css';
 
 interface StatusBantuanProps {
   onLogout?: () => void;
-  onNavigate?: (path: string) => void;
 }
 
 type BantuanStatus = 'Aktif' | 'Selesai' | 'Tertunda';
@@ -51,7 +51,8 @@ const mockData: BantuanData[] = [
   ]},
 ];
 
-const StatusBantuan: React.FC<StatusBantuanProps> = ({ onLogout, onNavigate }) => {
+const StatusBantuan: React.FC<StatusBantuanProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
   const [data] = useState<BantuanData[]>(mockData);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -88,7 +89,7 @@ const StatusBantuan: React.FC<StatusBantuanProps> = ({ onLogout, onNavigate }) =
   };
 
   return (
-    <AdminLayout title="Status Bantuan" activePath="/status-bantuan" onLogout={onLogout} onNavigate={onNavigate}>
+    <AdminLayout title="Status Bantuan" onLogout={onLogout}>
       <div className="status-bantuan-wrapper">
         
         <div className="sb-header">
@@ -206,7 +207,7 @@ const StatusBantuan: React.FC<StatusBantuanProps> = ({ onLogout, onNavigate }) =
                       </td>
                       <td>
                         <div className="sb-action-flex">
-                          <button className="sb-btn-icon" title="Lihat Detail" onClick={() => onNavigate && onNavigate('/detail-hasil')}>
+                          <button className="sb-btn-icon" title="Lihat Detail" onClick={() => navigate('/detail-hasil')}>
                             <Eye size={18} />
                           </button>
                           <button className="sb-btn-timeline" onClick={() => setSelectedTimeline(row.timeline)}>

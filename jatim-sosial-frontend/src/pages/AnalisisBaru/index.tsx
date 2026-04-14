@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/layout/AdminLayout';
 import { 
   CheckCircle, 
@@ -15,15 +16,15 @@ import './AnalisisBaru.css';
 
 interface AnalisisBaruProps {
   onLogout?: () => void;
-  onNavigate?: (path: string) => void;
 }
 
-const AnalisisBaru: React.FC<AnalisisBaruProps> = ({ onLogout, onNavigate }) => {
+const AnalisisBaru: React.FC<AnalisisBaruProps> = ({ onLogout }) => {
   const [inputMode, setInputMode] = useState<'manual' | 'import'>('manual');
   const [statusRumah, setStatusRumah] = useState('Milik Sendiri');
+  const navigate = useNavigate();
 
   return (
-    <AdminLayout title="Analisis Baru" activePath="/analisis-baru" onLogout={onLogout} onNavigate={onNavigate}>
+    <AdminLayout title="Analisis Baru" onLogout={onLogout}>
       <div className="analisis-page-wrapper">
         
         {/* Header and Mode Selector */}
@@ -272,7 +273,7 @@ const AnalisisBaru: React.FC<AnalisisBaruProps> = ({ onLogout, onNavigate }) => 
           <CheckCircle size={20} className="text-green" />
           <span>LENGKAPI DATA UNTUK PROSES ANALISIS AI</span>
         </div>
-        <button className="process-submit-btn" onClick={() => onNavigate && onNavigate('detail-hasil')}>
+        <button className="process-submit-btn" onClick={() => navigate('/detail-hasil')}>
           <BrainCircuit size={18} />
           Proses Analisis AI
         </button>

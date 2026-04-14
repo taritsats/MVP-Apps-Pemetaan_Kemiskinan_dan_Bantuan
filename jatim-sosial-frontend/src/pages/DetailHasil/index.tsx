@@ -20,10 +20,9 @@ import './DetailHasil.css';
 
 interface DetailHasilProps {
   onLogout?: () => void;
-  onNavigate?: (path: string) => void;
 }
 
-const DetailHasil: React.FC<DetailHasilProps> = ({ onLogout, onNavigate }) => {
+const DetailHasil: React.FC<DetailHasilProps> = ({ onLogout }) => {
   const [selectedPrograms, setSelectedPrograms] = useState<string[]>([]);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isFinalized, setIsFinalized] = useState(false);
@@ -86,7 +85,7 @@ const DetailHasil: React.FC<DetailHasilProps> = ({ onLogout, onNavigate }) => {
   };
 
   return (
-    <AdminLayout title="Detail Analisis Page" activePath="/detail-hasil" onLogout={onLogout} onNavigate={onNavigate}>
+    <AdminLayout title="Detail Analisis Page" onLogout={onLogout}>
       <div className="detail-page-wrapper">
         
         {/* Header Options */}

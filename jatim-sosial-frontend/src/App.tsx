@@ -4,6 +4,12 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AnalisisBaru from './pages/AnalisisBaru';
+import Riwayat from './pages/Riwayat';
+import Validasi from './pages/Validasi';
+import BasisPengetahuan from './pages/BasisPengetahuan';
+import Pengaturan from './pages/Pengaturan';
+import StatusBantuan from './pages/StatusBantuan';
+import DetailHasil from './pages/DetailHasil';
 import './App.css'; 
 
 interface ProtectedRouteProps {
@@ -21,33 +27,33 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, isLoggedIn })
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const protectedPage = (component: React.ReactNode) => (
+    <ProtectedRoute isLoggedIn={isLoggedIn}>
+      {component}
+    </ProtectedRoute>
+  );
+
+  const logout = () => setIsLoggedIn(false);
+
   return (
     <BrowserRouter>
       <div className="App">
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Landing />} />
-          
           <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
           
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute isLoggedIn={isLoggedIn}>
-                <Dashboard onLogout={() => setIsLoggedIn(false)} />
-              </ProtectedRoute>
-            } 
-          />
+          {/* Protected Routes */}
+          <Route path="/dashboard" element={protectedPage(<Dashboard onLogout={logout} />)} />
+          <Route path="/analisis-baru" element={protectedPage(<AnalisisBaru onLogout={logout} />)} />
+          <Route path="/riwayat" element={protectedPage(<Riwayat onLogout={logout} />)} />
+          <Route path="/antrean" element={protectedPage(<Validasi onLogout={logout} />)} />
+          <Route path="/basis-pengetahuan" element={protectedPage(<BasisPengetahuan onLogout={logout} />)} />
+          <Route path="/pengaturan" element={protectedPage(<Pengaturan onLogout={logout} />)} />
+          <Route path="/status-bantuan" element={protectedPage(<StatusBantuan onLogout={logout} />)} />
+          <Route path="/detail-hasil" element={protectedPage(<DetailHasil onLogout={logout} />)} />
           
-          <Route 
-            path="/analisis-baru" 
-            element={
-              <ProtectedRoute isLoggedIn={isLoggedIn}>
-                <AnalisisBaru onLogout={() => setIsLoggedIn(false)} />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Catch-all redirect to public landing */}
+          {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

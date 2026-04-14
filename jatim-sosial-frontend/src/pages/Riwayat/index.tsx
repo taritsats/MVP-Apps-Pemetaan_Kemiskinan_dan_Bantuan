@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/layout/AdminLayout';
 import {
   Search,
@@ -17,7 +18,6 @@ import './Riwayat.css';
 
 interface RiwayatProps {
   onLogout?: () => void;
-  onNavigate?: (path: string) => void;
 }
 
 const mockData = [
@@ -92,7 +92,8 @@ const getDesilColor = (desil: number) => {
   return 'progress-green';
 };
 
-const Riwayat: React.FC<RiwayatProps> = ({ onLogout, onNavigate }) => {
+const Riwayat: React.FC<RiwayatProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Semua Status');
   const [kecFilter, setKecFilter] = useState('Semua Kecamatan');
@@ -125,7 +126,7 @@ const Riwayat: React.FC<RiwayatProps> = ({ onLogout, onNavigate }) => {
   }, [searchTerm, statusFilter, kecFilter]);
 
   return (
-    <AdminLayout title="Riwayat Analisis" activePath="/riwayat" onLogout={onLogout} onNavigate={onNavigate}>
+    <AdminLayout title="Riwayat Analisis" onLogout={onLogout}>
       <div className="riwayat-page-wrapper">
         
         {/* Header Section */}
@@ -138,7 +139,7 @@ const Riwayat: React.FC<RiwayatProps> = ({ onLogout, onNavigate }) => {
             <button className="btn-secondary">
               <Download size={16} /> Ekspor Laporan
             </button>
-            <button className="btn-primary" onClick={() => onNavigate && onNavigate('/analisis-baru')}>
+            <button className="btn-primary" onClick={() => navigate('/analisis-baru')}>
               <Plus size={16} /> Analisis Baru
             </button>
           </div>
@@ -222,7 +223,7 @@ const Riwayat: React.FC<RiwayatProps> = ({ onLogout, onNavigate }) => {
                       <td>
                         <a href="#" className="link-no-analisis" onClick={(e) => {
                           e.preventDefault();
-                          onNavigate && onNavigate('/detail-hasil');
+                          navigate('/detail-hasil');
                         }}>
                           {row.no}
                         </a>
@@ -255,7 +256,7 @@ const Riwayat: React.FC<RiwayatProps> = ({ onLogout, onNavigate }) => {
                           <button 
                             className="btn-icon" 
                             title="Lihat Detail"
-                            onClick={() => onNavigate && onNavigate('/detail-hasil')}
+                            onClick={() => navigate('/detail-hasil')}
                           >
                             <Eye size={18} />
                           </button>

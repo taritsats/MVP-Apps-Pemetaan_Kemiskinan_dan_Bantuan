@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/layout/AdminLayout';
 import { 
   Download, 
@@ -13,7 +14,6 @@ import EmptyState from '../../components/ui/EmptyState';
 
 interface ValidasiProps {
   onLogout?: () => void;
-  onNavigate?: (path: string) => void;
 }
 
 type VerificationStatus = 'perlu_tindakan' | 'menunggu' | 'selesai' | 'ditolak';
@@ -39,7 +39,8 @@ const initialMockData: MockData[] = [
   { id: '4', idKasus: '#KS-09418', tanggal: '13 Okt 2023, 14:20', nama: 'Dewi Lestari', nik: '3578056001000xxx', prioritas: 'Tinggi', skor: 88, jenisBantuan: 'PKH - Lansia', statusDtks: 'Terdata', desil: 1, statusTab: 'perlu_tindakan' },
 ];
 
-const Validasi: React.FC<ValidasiProps> = ({ onLogout, onNavigate }) => {
+const Validasi: React.FC<ValidasiProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
   const [data, setData] = useState<MockData[]>(initialMockData);
   const [activeTab, setActiveTab] = useState<VerificationStatus>('perlu_tindakan');
 
@@ -109,7 +110,7 @@ const Validasi: React.FC<ValidasiProps> = ({ onLogout, onNavigate }) => {
   };
 
   return (
-    <AdminLayout title="Antrean Validasi" activePath="/antrean" onLogout={onLogout} onNavigate={onNavigate}>
+    <AdminLayout title="Antrean Validasi" onLogout={onLogout}>
       <div className="validasi-page-wrapper">
         
         {/* Header Section */}
@@ -238,7 +239,7 @@ const Validasi: React.FC<ValidasiProps> = ({ onLogout, onNavigate }) => {
                       <td>
                         <a href="#" className="link-id-kasus" onClick={(e) => {
                             e.preventDefault();
-                            if (onNavigate) onNavigate('/detail-hasil');
+                            navigate('/detail-hasil');
                         }}>
                           {row.idKasus}
                         </a>
@@ -260,7 +261,7 @@ const Validasi: React.FC<ValidasiProps> = ({ onLogout, onNavigate }) => {
                           <button 
                             className="btn-icon-view" 
                             title="Lihat Detail"
-                            onClick={() => onNavigate && onNavigate('/detail-hasil')}
+                            onClick={() => navigate('/detail-hasil')}
                           >
                             <Eye size={18} />
                           </button>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   PlusCircle, 
   Users,
@@ -10,18 +11,19 @@ import './Dashboard.css';
 
 interface DashboardProps {
   onLogout?: () => void;
-  onNavigate?: (path: string) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onLogout, onNavigate }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
+
   return (
-    <AdminLayout title="Dashboard Monitoring" activePath="/dashboard" onLogout={onLogout} onNavigate={onNavigate}>
+    <AdminLayout title="Dashboard Monitoring" onLogout={onLogout}>
       <div className="system-overview-header">
         <div>
           <h3 className="section-title">Ikhtisar Sistem</h3>
           <p className="section-subtitle">Status terkini bantuan sosial di Provinsi Jawa Timur</p>
         </div>
-        <button className="new-analysis-btn" onClick={() => onNavigate && onNavigate('/analisis-baru')}>
+        <button className="new-analysis-btn" onClick={() => navigate('/analisis-baru')}>
           <PlusCircle size={18} /> Mulai Analisis Baru
         </button>
       </div>
@@ -71,7 +73,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onNavigate }) => {
             <p className="section-subtitle">Distribusi kasus berdasarkan Kabupaten/Kota</p>
           </div>
           <div className="chart-toggles" style={{display: 'flex', gap: '8px'}}>
-            <button className="toggle-btn" onClick={() => onNavigate && onNavigate('/riwayat')} style={{padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', backgroundColor: '#fff', color: '#374151', transition: 'all 0.2s'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor='#f3f4f6'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor='#fff'}>
+            <button className="toggle-btn" onClick={() => navigate('/riwayat')} style={{padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', backgroundColor: '#fff', color: '#374151', transition: 'all 0.2s'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor='#f3f4f6'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor='#fff'}>
               Lihat Detail
             </button>
             <button className="toggle-btn active" onClick={() => console.log('view regional analysis')}>Mingguan</button>
@@ -129,7 +131,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onNavigate }) => {
                 <td><span className="badge tingkat red">Tinggi</span></td>
                 <td>PKH, BPNT</td>
                 <td><span className="status green"><span className="dot"></span> Terverifikasi</span></td>
-                <td><a href="#" className="action-link" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate('detail-hasil'); }}>Lihat<br/>Detail</a></td>
+                <td><a href="#" className="action-link" onClick={(e) => { e.preventDefault(); navigate('/detail-hasil'); }}>Lihat<br/>Detail</a></td>
               </tr>
               <tr>
                 <td>
