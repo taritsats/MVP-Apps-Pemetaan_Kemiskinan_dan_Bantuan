@@ -1,30 +1,66 @@
-from fastapi import FastAPI, UploadFile, File
-from pydantic import BaseModel
+import uvicorn
+from fastapi import FastAPI, UploadFile, File, Body
 
-app = FastAPI(title="Mock Service API AI (Tim 1, 2, 3)")
+app = FastAPI(title="Pusat Mock API Tim AI (1, 2, 3)", version="1.0")
 
-# --- MOCK TIM 1 (Klasifikasi) ---
-@app.post("/api/ai/tim1-klasifikasi")
-async def mock_tim1(data: dict):
+# 1. MOCK API TIM 1 (KLASIFIKASI DESIL)
+@app.post("/api/ai/tim1-klasifikasi", tags=["Tim 1 - LLM"])
+async def klasifikasi_tim1(data: dict = Body(...)):
+
+    aset_motor = data.get("kepemilikan_aset_kendaraan_sepeda_motor", False)
+    aset_kulkas = data.get("kepemilikan_aset_kulkas", False)
+    
+    if not aset_motor and not aset_kulkas:
+        desil = 1
+        kategori = "Sangat Miskin (Desil 1)"
+    else:
+        desil = 4
+        kategori = "Rentan Miskin (Desil 4)"
+
     return {
-        "desil": 1,
-        "kategori": "Sangat Miskin",
-        "reasoning": "Pendapatan sangat rendah dan tanggungan banyak (Mocked)"
+        "status": "success",
+        "desil": desil,
+        "kategori_kesejahteraan": kategori,
+        "reasoning": f"Analisis Mock Model: Berdasarkan input ketiadaan aset motor={aset_motor} dan kulkas={aset_kulkas}, diputuskan masuk ke Desil {desil}."
     }
 
-# --- MOCK TIM 2 (Visual Rutilahu) ---
-@app.post("/api/ai/tim2-visual")
-async def mock_tim2(file: UploadFile = File(...)):
+# 2. MOCK API TIM 2 (ANALISIS VISUAL RUMAH)
+@app.post("/api/ai/tim2-visual", tags=["Tim 2 - VisualLM"])
+async def visual_tim2(file: UploadFile = File(...)):
+
+    nama_file = file.filename
+    
     return {
-        "kondisi": "Rusak Berat",
-        "confidence": 0.92,
-        "catatan": "Atap bocor, dinding retak (Mocked)"
+        "status": "success",
+        "nama_file_dianalisis": nama_file,
+        "prediksi_material": {
+            "jenis_atap": 3,      
+            "jenis_dinding": 4,   
+            "jenis_lantai": 5    
+        },
+        "layak_huni": False,
+        "reasoning_visual": "Model mendeteksi tekstur kayu lapuk pada dinding (91% confidence) dan lantai tanpa semen (88% confidence)."
     }
 
-# --- MOCK TIM 3 (Rekomendasi RAG) ---
-@app.post("/api/ai/tim3-rekomendasi")
-async def mock_tim3(data: dict):
+# 3. MOCK API TIM 3 (REKOMENDASI BANTUAN)
+@app.post("/api/ai/tim3-rekomendasi", tags=["Tim 3 - RAG"])
+async def rekomendasi_tim3(data: dict = Body(...)):
+
+    desil = data.get("desil", 0)
+    
+    if desil <= 2:
+        bantuan = ["PKH", "BPNT (Sembako)", "Bantuan Bedah Rumah (RST)"]
+        alasan = f"Keluarga berada di Desil {desil}. Prioritas utama untuk intervensi multi-sektor termasuk perbaikan fasilitas fisik rumah."
+    else:
+        bantuan = ["PBI-JK (BPJS Gratis)"]
+        alasan = f"Keluarga berada di Desil {desil}. Disarankan fokus pada jaring pengaman kesehatan."
+
     return {
-        "rekomendasi": "Prioritas 1: Program Bantuan Bedah Rumah (Rutilahu) dan PKH Kesehatan.",
-        "sumber_aturan": "Pergub Jatim No. 12 Tahun 2023 (Mocked)"
+        "status": "success",
+        "rekomendasi_bantuan": bantuan,
+        "reasoning_rekomendasi": alasan
     }
+
+if __name__ == "__main__":
+    print("Menjalankan Mock Server AI di Port 8001...")
+    uvicorn.run(app, host="127.0.0.1", port=8001)
