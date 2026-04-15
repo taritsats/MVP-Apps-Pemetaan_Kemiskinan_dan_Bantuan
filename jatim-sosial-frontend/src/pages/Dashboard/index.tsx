@@ -144,7 +144,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 <td><span className="badge tingkat yellow">Menengah</span></td>
                 <td>BPNT</td>
                 <td><span className="status orange"><span className="dot"></span> Menunggu Validasi</span></td>
-                <td><a href="#" className="action-link" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate('detail-hasil'); }}>Lihat<br/>Detail</a></td>
+                <td><a href="#" className="action-link" onClick={(e) => { e.preventDefault(); navigate('/detail-hasil'); }}>Lihat<br/>Detail</a></td>
               </tr>
               <tr>
                 <td>
@@ -157,7 +157,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 <td><span className="badge tingkat red">Tinggi</span></td>
                 <td>PKH, Rutilahu</td>
                 <td><span className="status green"><span className="dot"></span> Terverifikasi</span></td>
-                <td><a href="#" className="action-link" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate('detail-hasil'); }}>Lihat<br/>Detail</a></td>
+                <td><a href="#" className="action-link" onClick={(e) => { e.preventDefault(); navigate('/detail-hasil'); }}>Lihat<br/>Detail</a></td>
               </tr>
               <tr>
                 <td>
@@ -170,7 +170,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                 <td><span className="badge tingkat blue">Rendah</span></td>
                 <td>Beasiswa Pendidikan</td>
                 <td><span className="status green"><span className="dot"></span> Terverifikasi</span></td>
-                <td><a href="#" className="action-link" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate('detail-hasil'); }}>Lihat<br/>Detail</a></td>
+                <td><a href="#" className="action-link" onClick={(e) => { e.preventDefault(); navigate('/detail-hasil'); }}>Lihat<br/>Detail</a></td>
               </tr>
             </tbody>
           </table>
