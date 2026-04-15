@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Landing from './pages/Landing';
+import Landing from './pages/Landing/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AnalisisBaru from './pages/AnalisisBaru';

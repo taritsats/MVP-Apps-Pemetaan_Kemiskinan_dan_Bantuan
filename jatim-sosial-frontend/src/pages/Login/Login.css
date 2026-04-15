@@ -122,12 +122,14 @@
 
 .input-wrapper input {
   flex: 1;
-  border: none;
-  background: transparent;
+  border: none !important;
+  background: transparent !important;
   padding: 12px 14px;
   font-size: 14px;
   color: #111827;
-  outline: none;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
 }
 
 .input-wrapper input::placeholder {
