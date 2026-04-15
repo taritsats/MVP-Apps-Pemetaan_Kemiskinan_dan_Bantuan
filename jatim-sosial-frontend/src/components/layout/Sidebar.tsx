@@ -3,8 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   PlusCircle, 
-  History, 
-  ClipboardCheck, 
+  ClipboardList, 
   BookOpen, 
   Settings, 
   LogOut 
@@ -43,17 +42,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           <li className={activePath === '/analisis-baru' ? 'active' : ''} onClick={() => navigate('/analisis-baru')}>
             <PlusCircle size={20} /> <span>Analisis Baru</span>
           </li>
-          <li className={activePath === '/riwayat' ? 'active' : ''} onClick={() => navigate('/riwayat')}>
-            <History size={20} /> <span>Riwayat Analisis</span>
-          </li>
-          <li className={activePath === '/antrean' ? 'active' : ''} onClick={() => navigate('/antrean')}>
-            <ClipboardCheck size={20} /> <span>Antrean Validasi</span>
+          <li className={activePath === '/manajemen-bantuan' ? 'active' : ''} onClick={() => navigate('/manajemen-bantuan')}>
+            <ClipboardList size={20} /> <span>Manajemen Bantuan</span>
           </li>
           <li className={activePath === '/basis-pengetahuan' ? 'active' : ''} onClick={() => navigate('/basis-pengetahuan')}>
             <BookOpen size={20} /> <span>Basis Pengetahuan</span>
-          </li>
-          <li className={activePath === '/status-bantuan' ? 'active' : ''} onClick={() => navigate('/status-bantuan')}>
-            <ClipboardCheck size={20} /> <span>Status Bantuan</span>
           </li>
           <li className={activePath === '/pengaturan' ? 'active' : ''} onClick={() => navigate('/pengaturan')}>
             <Settings size={20} /> <span>Pengaturan</span>

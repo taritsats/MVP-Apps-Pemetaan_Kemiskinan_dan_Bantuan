@@ -4,11 +4,9 @@ import Landing from './pages/Landing/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AnalisisBaru from './pages/AnalisisBaru';
-import Riwayat from './pages/Riwayat';
-import Validasi from './pages/Validasi';
+import ManajemenBantuan from './pages/ManajemenBantuan';
 import BasisPengetahuan from './pages/BasisPengetahuan';
 import Pengaturan from './pages/Pengaturan';
-import StatusBantuan from './pages/StatusBantuan';
 import DetailHasil from './pages/DetailHasil';
 import './App.css'; 
 
@@ -46,11 +44,9 @@ function App() {
           {/* Protected Routes */}
           <Route path="/dashboard" element={protectedPage(<Dashboard onLogout={logout} />)} />
           <Route path="/analisis-baru" element={protectedPage(<AnalisisBaru onLogout={logout} />)} />
-          <Route path="/riwayat" element={protectedPage(<Riwayat onLogout={logout} />)} />
-          <Route path="/antrean" element={protectedPage(<Validasi onLogout={logout} />)} />
+          <Route path="/manajemen-bantuan" element={protectedPage(<ManajemenBantuan onLogout={logout} />)} />
           <Route path="/basis-pengetahuan" element={protectedPage(<BasisPengetahuan onLogout={logout} />)} />
           <Route path="/pengaturan" element={protectedPage(<Pengaturan onLogout={logout} />)} />
-          <Route path="/status-bantuan" element={protectedPage(<StatusBantuan onLogout={logout} />)} />
           <Route path="/detail-hasil" element={protectedPage(<DetailHasil onLogout={logout} />)} />
           
           {/* Catch-all */}

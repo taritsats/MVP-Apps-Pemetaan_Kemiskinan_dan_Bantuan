@@ -73,7 +73,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             <p className="section-subtitle">Distribusi kasus berdasarkan Kabupaten/Kota</p>
           </div>
           <div className="chart-toggles" style={{display: 'flex', gap: '8px'}}>
-            <button className="toggle-btn" onClick={() => navigate('/riwayat')} style={{padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', backgroundColor: '#fff', color: '#374151', transition: 'all 0.2s'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor='#f3f4f6'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor='#fff'}>
+            <button className="toggle-btn" onClick={() => navigate('/manajemen-bantuan')} style={{padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', backgroundColor: '#fff', color: '#374151', transition: 'all 0.2s'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor='#f3f4f6'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor='#fff'}>
               Lihat Detail
             </button>
             <button className="toggle-btn active" onClick={() => console.log('view regional analysis')}>Mingguan</button>
