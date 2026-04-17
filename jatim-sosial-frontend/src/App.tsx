@@ -1,41 +1,60 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Landing from './pages/Landing/Landing';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import AnalisisBaru from './pages/AnalisisBaru';
+import ManajemenBantuan from './pages/ManajemenBantuan';
+import BasisPengetahuan from './pages/BasisPengetahuan';
+import Pengaturan from './pages/Pengaturan';
+import DetailHasil from './pages/DetailHasil';
+import './App.css'; 
 
-// function App() {
-//   const [count, setCount] = useState(0)
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  isLoggedIn: boolean;
+}
 
-//   return (
-//     <>
-//       <div>
-//         <a href="https://vite.dev" target="_blank">
-//           <img src={viteLogo} className="logo" alt="Vite logo" />
-//         </a>
-//         <a href="https://react.dev" target="_blank">
-//           <img src={reactLogo} className="logo react" alt="React logo" />
-//         </a>
-//       </div>
-//       <h1>Vite + React</h1>
-//       <div className="card">
-//         <button onClick={() => setCount((count) => count + 1)}>
-//           count is {count}
-//         </button>
-//         <p>
-//           Edit <code>src/App.tsx</code> and save to test HMR
-//         </p>
-//       </div>
-//       <p className="read-the-docs">
-//         Click on the Vite and React logos to learn more
-//       </p>
-//     </>
-//   )
-// }
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, isLoggedIn }) => {
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+};
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const protectedPage = (component: React.ReactNode) => (
+    <ProtectedRoute isLoggedIn={isLoggedIn}>
+      {component}
+    </ProtectedRoute>
+  );
+
+  const logout = () => setIsLoggedIn(false);
+
   return (
-    <h1 className="text-4xl font-bold text-blue-600">Tailwind berhasil!</h1>
+    <BrowserRouter>
+      <div className="App">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
+          
+          {/* Protected Routes */}
+          <Route path="/dashboard" element={protectedPage(<Dashboard onLogout={logout} />)} />
+          <Route path="/analisis-baru" element={protectedPage(<AnalisisBaru onLogout={logout} />)} />
+          <Route path="/manajemen-bantuan" element={protectedPage(<ManajemenBantuan onLogout={logout} />)} />
+          <Route path="/basis-pengetahuan" element={protectedPage(<BasisPengetahuan onLogout={logout} />)} />
+          <Route path="/pengaturan" element={protectedPage(<Pengaturan onLogout={logout} />)} />
+          <Route path="/detail-hasil" element={protectedPage(<DetailHasil onLogout={logout} />)} />
+          
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 
-export default App
+export default App;
