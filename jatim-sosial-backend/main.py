@@ -206,17 +206,18 @@ async def asesmen_sosial(data: DataWarga, current_user: models.User = Depends(ge
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/v1/asesmen/visual/{no_kk}", tags=["3. Asesmen Tim 2"], summary="Upload 1 Foto Berdasarkan KK")
-async def asesmen_visual(no_kk: str, file: UploadFile = File(...), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # 1. Cari data warga berdasarkan no_kk
-    keluarga = db.query(models.Keluarga).filter(models.Keluarga.nomor_kartu_keluarga == no_kk).first()
+@app.post("/api/v1/asesmen/visual/{id_keluarga}", tags=["3. Asesmen Tim 2"], summary="Upload 1 Foto Berdasarkan ID Keluarga")
+async def asesmen_visual(id_keluarga: str, file: UploadFile = File(...), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # 1. Cari data warga berdasarkan ID Keluarga (Primary Key)
+    keluarga = db.query(models.Keluarga).filter(models.Keluarga.id == id_keluarga).first()
     if not keluarga:
-        raise HTTPException(status_code=404, detail="Data dengan no kk tersebut belum ada di database! Masukkan via Asesmen Sosial dulu.")
+        raise HTTPException(status_code=404, detail="Data dengan ID Keluarga tersebut tidak ditemukan! Pastikan ID sudah benar.")
 
     try:
-        # 2. Upload 1 foto ke MinIO
+        # 2. Upload foto ke MinIO Asli
         content = await file.read()
-        nama_unik = f"{no_kk}_{file.filename}"
+        nama_unik = f"{id_keluarga}_{file.filename}"
+        
         s3_client.put_object(Bucket=MINIO_BUCKET, Key=nama_unik, Body=content, ContentType=file.content_type)
         url_foto = f"http://{MINIO_ENDPOINT}/{MINIO_BUCKET}/{nama_unik}"
 
@@ -235,7 +236,6 @@ async def asesmen_visual(no_kk: str, file: UploadFile = File(...), current_user:
             hitung = models.Perhitungan(keluarga_id=keluarga.id, user_id=current_user.id)
             db.add(hitung)
 
-        # Masukkan variabel yang sudah berwujud teks dan URL
         hitung.kondisi_rumah = kondisi_teks
         hitung.foto_url = url_foto
         db.commit()
