@@ -1,5 +1,6 @@
 import uuid
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, SmallInteger
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, SmallInteger, JSON, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from database import Base
 
@@ -73,9 +74,22 @@ class Perhitungan(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     keluarga_id = Column(UUID(as_uuid=True), ForeignKey("keluarga.id"))
     user_id = Column(UUID(as_uuid=True), ForeignKey("user.id"))
-    
     desil_kemiskinan = Column(String)
-    rekomendasi_bantuan = Column(String)
+    skor_prioritas = Column(Integer, nullable=True)
+    rekomendasi_bantuan = Column(JSON, nullable=True) 
     kondisi_rumah = Column(String, nullable=True)
     foto_url = Column(String, nullable=True)
     status_validasi = Column(String, default="Menunggu")
+
+# --- TABEL 4: LOG HISTORI (AUDIT TRAIL) ---
+class LogHistori(Base):
+    __tablename__ = "log_histori"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    keluarga_id = Column(UUID(as_uuid=True), ForeignKey("keluarga.id"))
+    user_id = Column(UUID(as_uuid=True), ForeignKey("user.id"), nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    desil_lama = Column(String, nullable=True)
+    desil_baru = Column(String, nullable=True)
+    bantuan_lama = Column(JSON, nullable=True) 
+    bantuan_baru = Column(JSON, nullable=True)
+    
