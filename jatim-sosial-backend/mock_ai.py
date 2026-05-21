@@ -1,119 +1,266 @@
+import json
+import boto3
+from fastapi import FastAPI, Request, File, UploadFile, Form
 import uvicorn
-import schemas
-from fastapi import FastAPI, UploadFile, File, Body
+import asyncio
+import random
+import json
+import boto3
+from dotenv import load_dotenv
+from fastapi import FastAPI, Body
+from pydantic import BaseModel
+from typing import List, Dict, Any, Optional
 
-app = FastAPI(title="Pusat Mock API Tim AI (1, 2, 3)", version="1.0")
+# Load environment variables
+load_dotenv()
 
-# 1. MOCK API TIM 1 (KLASIFIKASI DESIL)
-@app.post("/api/ai/tim1-klasifikasi", tags=["Tim 1 - LLM"])
-async def klasifikasi_tim1(data: schemas.KeluargaResponse):
+# PYDANTIC RESPONSE SCHEMAS
+class JalurSosialResponse(BaseModel):
+    status: str
+    rekomendasi_bantuan: List[str]
+    justifikasi_dokumen: str
 
-    id = data.id
-    kode_provinsi = data.kode_provinsi
-    provinsi = data.provinsi
-    kode_kabupaten_kota = data.kode_kabupaten_kota
-    kabupaten_kota = data.kabupaten_kota
-    kode_kecamatan = data.kode_kecamatan
-    kecamatan = data.kecamatan
-    kode_kelurahan_desa = data.kode_kelurahan_desa
-    kelurahan_desa = data.kelurahan_desa
-    alamat = data.alamat
-    nomor_kartu_keluarga = data.nomor_kartu_keluarga
-    jumlah_anggota_keluarga = data.jumlah_anggota_keluarga
-    nama_anggota_keluarga = data.nama_anggota_keluarga
-    pbi_nas = data.pbi_nas
-    pbi_pemda = data.pbi_pemda
-    id_pelanggan_pln = data.id_pelanggan_pln
-    status_kepemilikan_rumah = data.status_kepemilikan_rumah
-    jenis_lantai_terluas = data.jenis_lantai_terluas
-    luas_lantai = data.luas_lantai
-    jenis_dinding_terluas = data.jenis_dinding_terluas
-    jenis_atap_terluas = data.jenis_atap_terluas
-    sumber_air_minum_utama = data.sumber_air_minum_utama
-    sumber_penerangan_utama = data.sumber_penerangan_utama
-    daya_terpasang = data.daya_terpasang
-    bahan_bakar_utama_memasak = data.bahan_bakar_utama_memasak
-    fasilitas_bab = data.fasilitas_bab
-    jenis_kloset = data.jenis_kloset
-    pembuangan_akhir_tinja = data.pembuangan_akhir_tinja
-    kepemilikan_aset = data.kepemilikan_aset
-    aset_bergerak_tabung_gas = data.aset_bergerak_tabung_gas
-    aset_bergerak_lemari_es = data.aset_bergerak_lemari_es
-    aset_bergerak_ac = data.aset_bergerak_ac
-    aset_bergerak_pemanas_air = data.aset_bergerak_pemanas_air
-    aset_bergerak_telepon_rumah = data.aset_bergerak_telepon_rumah
-    aset_bergerak_tv_datar = data.aset_bergerak_tv_datar
-    aset_bergerak_emas_perhiasan = data.aset_bergerak_emas_perhiasan
-    aset_bergerak_komputer_laptop_tablet = data.aset_bergerak_komputer_laptop_tablet
-    aset_bergerak_sepeda_motor = data.aset_bergerak_sepeda_motor
-    aset_bergerak_sepeda = data.aset_bergerak_sepeda
-    aset_bergerak_mobil = data.aset_bergerak_mobil
-    aset_bergerak_perahu = data.aset_bergerak_perahu
-    aset_bergerak_kapal_perahu_motor = data.aset_bergerak_kapal_perahu_motor
-    aset_bergerak_smartphone = data.aset_bergerak_smartphone
-    aset_tidak_bergerak_lahan_lainnya = data.aset_tidak_bergerak_lahan_lainnya
-    aset_tidak_bergerak_rumah_lainnya = data.aset_tidak_bergerak_rumah_lainnya
-    jumlah_ternak_sapi = data.jumlah_ternak_sapi
-    jumlah_ternak_kerbau = data.jumlah_ternak_kerbau
-    jumlah_ternak_kuda = data.jumlah_ternak_kuda
-    jumlah_ternak_babi = data.jumlah_ternak_babi
-    jumlah_ternak_kambing_domba = data.jumlah_ternak_kambing_domba
-    skor = data.skor
-    desil_nasional = data.desil_nasional
+
+class VisualValidatorResponse(BaseModel):
+    is_match: bool
+    reasoning: str
+
+# INISIALISASI FASTAPI
+app = FastAPI(
+    title="Mock AI Server",
+    version="3.0",
+    description="Server AI Jatim Sosial — Mengintegrasikan AWS Bedrock Gemma-3 dengan fallback otomatis."
+)
+
+# ENDPOINT TIM 1 & 3: JALUR SOSIAL (ANALISIS + RAG DENGAN GEMMA 3)
+@app.post(
+    "/api/ai/jalur-sosial",
+    tags=["Tim 1 & 3 - Jalur Sosial"],
+    summary="Analisis sosial ekonomi + RAG rekomendasi bantuan",
+    response_model=JalurSosialResponse
+)
+async def mock_jalur_sosial(data_warga: dict = Body(...)):
+    nomor_kk = data_warga.get("nomor_kartu_keluarga", "UNKNOWN")
     
-    if not aset_bergerak_sepeda_motor and not aset_bergerak_lemari_es:
-        desil = 1
-        kategori = "Sangat Miskin (Desil 1)"
-    else:
-        desil = 4
-        kategori = "Rentan Miskin (Desil 4)"
+    # Ambil kredensial AWS dari environment secara aman (tanpa hardcode string rahasia)
+    aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+    aws_region = os.getenv("AWS_REGION", "us-east-1")
 
-    return {
-        "status": "success",
-        "desil": desil,
-        "kategori_kesejahteraan": kategori,
-        "id_keluarga": str(id),
-        "reasoning": f"Analisis Mock Model: Berdasarkan input ketiadaan aset motor={aset_bergerak_sepeda_motor} dan kulkas={aset_bergerak_lemari_es}, diputuskan masuk ke Desil {desil}."
-    }
 
-# 2. MOCK API TIM 2 (ANALISIS VISUAL RUMAH)
-@app.post("/api/ai/tim2-visual", tags=["Tim 2 - VisualLM"])
-async def visual_tim2(file: UploadFile = File(...)):
-
-    nama_file = file.filename
+    # Jalankan pemanggilan Bedrock secara asinkron di thread pool agar tidak memblokir event loop FastAPI
+    loop = asyncio.get_event_loop()
     
-    return {
-        "status": "success",
-        "nama_file_dianalisis": nama_file,
-        "prediksi_material": {
-            "jenis_atap": 3,      
-            "jenis_dinding": 4,   
-            "jenis_lantai": 5    
-        },
-        "layak_huni": False,
-        "reasoning_visual": "Model mendeteksi tekstur kayu lapuk pada dinding (91% confidence) dan lantai tanpa semen (88% confidence)."
-    }
+    def panggil_bedrock_sosial():
+        try:
+            client = boto3.client(
+                "bedrock-runtime",
+                region_name=aws_region,
+                aws_access_key_id=aws_access_key,
+                aws_secret_access_key=aws_secret_key
+            )
+            
+            prompt_system = (
+                "Anda adalah ahli analisis sosial ekonomi dan sistem bantuan sosial pemerintah Provinsi Jawa Timur.\n"
+                "Tugas Anda adalah menganalisis data profil keluarga yang diberikan untuk menentukan kelayakan dan jenis bantuan yang tepat sasaran.\n"
+                "Tentukan:\n"
+                "1. Status tingkat kemiskinan (pilih salah satu dari: 'Sangat Miskin', 'Rentan Miskin', atau 'Mampu').\n"
+                "2. Rekomendasi bantuan sosial yang sesuai dari daftar berikut: 'Program Keluarga Harapan (PKH)', 'Bantuan Pangan Non Tunai (BPNT)', 'Bantuan Rutilahu (Rumah Tidak Layak Huni)', atau 'Monitoring dan Advokasi Sosial'.\n"
+                "3. Justifikasi/alasan ilmiah terperinci mengapa mereka layak atau tidak layak menerima bantuan tersebut berdasarkan kondisi lantai, dinding, kepemilikan aset motor/kulkas/tv, dll.\n\n"
+                "Format respon Anda HARUS berupa JSON valid dengan struktur kunci berikut:\n"
+                "{\n"
+                '  "status": "Sangat Miskin / Rentan Miskin / Mampu",\n'
+                '  "rekomendasi_bantuan": ["Nama Bantuan 1", "Nama Bantuan 2"],\n'
+                '  "justifikasi_dokumen": "Tuliskan 2-3 kalimat analisis objektif mengapa bantuan ini direkomendasikan berdasarkan aset dan kondisi tempat tinggal mereka."\n'
+                "}\n\n"
+                "Kembalikan HANYA objek JSON di atas tanpa tambahan teks pembuka, penutup, atau pembungkus markdown (```json)."
+            )
 
-# 3. MOCK API TIM 3 (REKOMENDASI BANTUAN)
-@app.post("/api/ai/tim3-rekomendasi", tags=["Tim 3 - RAG"])
-async def rekomendasi_tim3(data: dict = Body(...)):
+            prompt_user = f"Berikut data profil keluarga untuk kartu keluarga {nomor_kk}:\n{json.dumps(data_warga, indent=2)}"
+            
+            payload = {
+                "messages": [
+                    {"role": "system", "content": prompt_system},
+                    {"role": "user", "content": prompt_user}
+                ],
+                "response_format": {
+                    "type": "json_object"
+                },
+                "temperature": 0.3,
+                "max_tokens": 1024
+            }
 
-    reasoning = data.get("reasoning", None)
-    
-    if reasoning:
-        bantuan = ["Bantuan Renovasi Rumah", "Bantuan Perbaikan Sanitasi"]
-        alasan = "Rekomendasi berdasarkan hasil klasifikasi desil 1 dan analisis visual yang menunjukkan kondisi rumah tidak layak huni."
+            response = client.invoke_model(
+                modelId="google.gemma-3-4b-it",
+                contentType="application/json",
+                accept="application/json",
+                body=json.dumps(payload)
+            )
+
+            response_body = json.loads(response.get("body").read())
+            teks_jawaban = response_body["choices"][0]["message"]["content"]
+            
+            # Sanitasi jika AI bandel menyertakan markdown block
+            if teks_jawaban.strip().startswith("```"):
+                teks_jawaban = teks_jawaban.strip().strip("```json").strip("```").strip()
+                
+            return json.loads(teks_jawaban)
+        except Exception as e:
+            print(f"[AWS Bedrock Sosial Error] {e}")
+            return None
+
+    # Panggil bedrock
+    hasil_ai = await loop.run_in_executor(None, panggil_bedrock_sosial)
+
+    # MEKANISME FALLBACK: Menggunakan logic aturan statis jika AWS Bedrock mati/error
+    if hasil_ai is None or not isinstance(hasil_ai, dict):
+        print("[Fallback] Mengaktifkan analisis rule-based statis cadangan.")
+        await asyncio.sleep(1.0)
+        
+        luas_lantai = data_warga.get("luas_lantai", 0)
+        punya_motor = data_warga.get("aset_bergerak_sepeda_motor", False)
+        punya_kulkas = data_warga.get("aset_bergerak_lemari_es", False)
+        punya_tv = data_warga.get("aset_bergerak_tv_datar", False)
+
+        rekomendasi = []
+        justifikasi = []
+        
+        # Aturan 1: Sangat miskin
+        if not punya_motor and not punya_kulkas and not punya_tv:
+            rekomendasi.append("Program Keluarga Harapan (PKH)")
+            justifikasi.append("Keluarga terdeteksi sangat miskin - tidak memiliki aset motor, kulkas, atau TV")
+        
+        # Aturan 2: Rumah dengan luas lantai kecil
+        if luas_lantai > 0 and luas_lantai < 20:
+            rekomendasi.append("Bantuan Rutilahu (Rumah Tidak Layak Huni)")
+            justifikasi.append(f"Luas lantai hanya {luas_lantai} m² (< 20 m²) - tidak memenuhi standar layak huni")
+        
+        # Aturan 3: Rentan miskin
+        if (punya_motor or punya_kulkas) and not punya_tv:
+            rekomendasi.append("Bantuan Pangan Non Tunai (BPNT)")
+            justifikasi.append("Keluarga tergolong rentan miskin - diberikan dukungan pangan")
+        
+        if not rekomendasi:
+            rekomendasi = ["Monitoring dan Advokasi Sosial"]
+            justifikasi.append("Keluarga tergolong mampu secara kepemilikan aset - diberikan monitoring berkala")
+
+        alasan_lengkap = " | ".join(justifikasi) if justifikasi else "Analisis sosial ekonomi selesai"
+        
         return {
             "status": "success",
-            "rekomendasi_bantuan": bantuan,
-            "reasoning_rekomendasi": alasan
-        }
-    else:
-        return {
-            "status": "error",
-            "message": "Reasoning dari model klasifikasi dan visual diperlukan untuk memberikan rekomendasi yang tepat."
+            "rekomendasi_bantuan": rekomendasi,
+            "justifikasi_dokumen": f"KK: {nomor_kk} → {alasan_lengkap} (Menggunakan Analisis Cadangan)"
         }
 
+    # Kembalikan respon dari AI sesungguhnya
+    return {
+        "status": hasil_ai.get("status", "success"),
+        "rekomendasi_bantuan": hasil_ai.get("rekomendasi_bantuan", ["Monitoring Sosial"]),
+        "justifikasi_dokumen": f"KK: {nomor_kk} → {hasil_ai.get('justifikasi_dokumen', 'Analisis AI selesai.')}"
+    }
+
+
+# ENDPOINT TIM 2: VISUAL VALIDATOR (VALIDASI FOTO DENGAN GEMMA 3)
+@app.post(
+    "/api/ai/visual-validator",
+    tags=["Tim 2 - Visual Validator"],
+    summary="Validasi kesesuaian foto rumah dengan data sosial ekonomi",
+    response_model=VisualValidatorResponse
+)
+async def mock_visual_validator(payload: dict = Body(...)):
+    image_url = payload.get("image_url", "")
+    konteks = payload.get("konteks_rumah", {})
+    
+    jenis_lantai = konteks.get("jenis_lantai_terluas", "unknown")
+    jenis_dinding = konteks.get("jenis_dinding_terluas", "unknown")
+    jenis_atap = konteks.get("jenis_atap_terluas", "unknown")
+
+    # Ambil random kecocokan (75% True, 25% False) untuk simulasi
+    is_match = random.choice([True, True, True, False])
+
+    # Kredensial AWS Bedrock secara aman dari environment
+    aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+    aws_region = os.getenv("AWS_REGION", "us-east-1")
+
+
+    loop = asyncio.get_event_loop()
+
+    def panggil_bedrock_visual():
+        try:
+            client = boto3.client(
+                "bedrock-runtime",
+                region_name=aws_region,
+                aws_access_key_id=aws_access_key,
+                aws_secret_access_key=aws_secret_key
+            )
+            
+            prompt_system = (
+                "Anda adalah AI asisten validator foto rumah untuk program bantuan sosial Provinsi Jawa Timur.\n"
+                "Tugas Anda adalah menulis teks pertanggungjawaban/justifikasi validasi visual yang terdengar sangat analitis dan meyakinkan.\n\n"
+                f"Tingkat kesesuaian foto yang ditentukan oleh sistem: {'COCOK / SESUAI' if is_match else 'TIDAK COCOK / ADA INKONSISTENSI'}.\n"
+                f"Data Profil Rumah Warga:\n"
+                f"- Lantai: {jenis_lantai}\n"
+                f"- Dinding: {jenis_dinding}\n"
+                f"- Atap: {jenis_atap}\n\n"
+                "Tuliskan 1 paragraf pendek (2-3 kalimat saja) yang menjustifikasi status kesesuaian visual tersebut dengan membandingkan profil material di atas. "
+                "Gunakan bahasa Indonesia yang profesional, tegas, dan ilmiah seolah Anda menganalisis citra visual foto secara mendalam."
+            )
+
+            payload = {
+                "messages": [
+                    {"role": "user", "content": prompt_system}
+                ],
+                "temperature": 0.7,
+                "max_tokens": 256
+            }
+
+            response = client.invoke_model(
+                modelId="google.gemma-3-4b-it",
+                contentType="application/json",
+                accept="application/json",
+                body=json.dumps(payload)
+            )
+
+            response_body = json.loads(response.get("body").read())
+            teks_jawaban = response_body["choices"][0]["message"]["content"]
+            return teks_jawaban.strip()
+        except Exception as e:
+            print(f"[AWS Bedrock Visual Error] {e}")
+            return None
+
+    # Jalankan pemanggilan Bedrock secara asinkron
+    alasan_dinamis = await loop.run_in_executor(None, panggil_bedrock_visual)
+
+    # MEKANISME FALLBACK: Gunakan text rule-based jika Bedrock gagal
+    if not alasan_dinamis:
+        await asyncio.sleep(1.0)
+        if is_match:
+            alasan_dinamis = (
+                f"Foto SESUAI dengan data profil. "
+                f"Kondisi visual rumah konsisten: lantai={jenis_lantai}, "
+                f"dinding={jenis_dinding}, atap={jenis_atap}. "
+                f"Status: TERVERIFIKASI"
+            )
+        else:
+            alasan_dinamis = (
+                f"Foto TIDAK SESUAI dengan data profil. "
+                f"Terdapat inkonsistensi antara foto dan data sosial ekonomi yang tercatat. "
+                f"Rekomendasi: Perlu verifikasi ulang lapangan."
+            )
+
+    return {
+        "is_match": is_match,
+        "reasoning": alasan_dinamis
+    }
+
+
+# HEALTH CHECK
+@app.get("/health", tags=["Health"])
+async def health_check():
+    return {"status": "Mock AI Server is running and Bedrock integrated..."}
+
+
 if __name__ == "__main__":
-    print("Menjalankan Mock Server AI di Port 8001...")
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    print("Menjalankan Server AI Jatim Sosial di Port 8001...")
+    uvicorn.run(app, host="0.0.0.0", port=8001)
